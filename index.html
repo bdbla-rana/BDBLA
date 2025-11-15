@@ -7,7 +7,6 @@
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #f0f2f5;
@@ -20,7 +19,6 @@
             padding: 15px; 
             box-sizing: border-box;
         }
-
         .container {
             width: 100%; 
             max-width: 450px; 
@@ -33,12 +31,28 @@
             position: relative;
             z-index: 10;
         }
-
         h2 {
             margin-top: 0;
             color: #1a202c;
         }
-
+        /* --- Button to go to History Page --- */
+        .nav-button {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #10b981;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 15px;
+            transition: background-color 0.2s;
+            text-align: center;
+        }
+        .nav-button:hover {
+            background-color: #059669;
+        }
+        /* --- End of Nav Button Style --- */
         #drop-area {
             border: 2px dashed #d1d5db;
             border-radius: 8px;
@@ -47,40 +61,25 @@
             cursor: pointer;
             transition: background-color 0.2s, border-color 0.2s;
         }
-
         #drop-area.drag-over {
             background-color: #eef2ff;
             border-color: #4f46e5;
         }
-
-        #drop-area p {
-            margin: 0;
-            font-size: 16px;
-            color: #6b7280;
-        }
-
-        #drop-area p strong {
-            color: #4f46e5;
-        }
-
-        #file-input {
-            display: none;
-        }
-
+        #drop-area p { margin: 0; font-size: 16px; color: #6b7280; }
+        #drop-area p strong { color: #4f46e5; }
+        #file-input { display: none; }
         #file-name {
             margin-top: 15px;
             font-weight: 500;
             color: #4f46e5;
             word-wrap: break-word; 
         }
-
         #upload-counter {
             font-size: 14px;
             color: #6b7280;
             margin-top: 8px;
             margin-bottom: 0;
         }
-
         #upload-button {
             width: 100%;
             padding: 12px;
@@ -94,16 +93,11 @@
             margin-top: 20px;
             transition: background-color 0.2s;
         }
-
         #upload-button:disabled {
             background-color: #9ca3af;
             cursor: not-allowed;
         }
-
-        #upload-button:hover:not(:disabled) {
-            background-color: #4338ca;
-        }
-
+        #upload-button:hover:not(:disabled) { background-color: #4338ca; }
         .loader {
             display: none; 
             width: 40px;
@@ -114,27 +108,17 @@
             animation: spin 1s linear infinite;
             margin: 20px auto 0;
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
         #result-box {
             display: none; 
             margin-top: 25px;
             text-align: left;
         }
-
-        #result-box p {
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        .link-container {
-            display: flex;
-        }
-
+        #result-box p { margin-bottom: 8px; font-weight: 500; }
+        .link-container { display: flex; }
         #image-link {
             width: 100%;
             padding: 10px;
@@ -146,7 +130,6 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-
         #copy-button {
             padding: 10px 15px;
             background-color: #10b981;
@@ -156,14 +139,9 @@
             cursor: pointer;
             font-weight: 500;
         }
-
-        #status-message {
-            margin-top: 15px;
-            font-size: 14px;
-        }
+        #status-message { margin-top: 15px; font-size: 14px; }
         .success { color: #10b981; }
         .error { color: #ef4444; }
-
         #footer-credit {
             position: fixed;
             bottom: 15px;
@@ -173,18 +151,10 @@
             animation: rainbowText 3s linear infinite;
             z-index: 5;
         }
-
         @keyframes rainbowText {
-            0% { color: #ff0000; } 
-            15% { color: #ff7f00; }
-            30% { color: #ffff00; }
-            45% { color: #00ff00; }
-            60% { color: #0000ff; }
-            75% { color: #4b0082; }
-            90% { color: #8f00ff; }
-            100% { color: #ff0000; }
+            0% { color: #ff0000; } 15% { color: #ff7f00; } 30% { color: #ffff00; } 45% { color: #00ff00; }
+            60% { color: #0000ff; } 75% { color: #4b0082; } 90% { color: #8f00ff; } 100% { color: #ff0000; }
         }
-
         #recent-uploads-container {
             display: none;
             margin-top: 25px;
@@ -217,38 +187,15 @@
             font-size: 14px;
             word-break: break-all;
         }
-        .nav-button{
-            color: turquoise;
-            border: 2px solid turquoise;
-            text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: background-color 0.2s, color 0.2s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
-        .nav-button:hover {
-            background-color: turquoise;
-            color: white;
-        }
-        .ft {
-            position: fixed;
-            bottom: 15px;
-            left: 20px;
-            font-size: 14px;
-            font-weight: 600; 
-            animation: rainbowText 3s linear infinite;
-            z-index: 5;
-        }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h2>File Uploader</h2>
+        
+        <!-- Button to navigate -->
+        <a href="history.html" class="nav-button">View All Files</a>
         
         <div id="drop-area">
             <input type="file" id="file-input">
@@ -271,29 +218,27 @@
                 <button id="copy-button">Copy</button>
             </div>
         </div>
-        <div>
-            <a href="history.html" class="nav-button">View All Files</a>
-        </div>
 
         <div id="recent-uploads-container">
             <h3>Recent Uploads (Today)</h3>
             <ul id="recent-uploads-list">
-                </ul>
+                <!-- JS will fill this -->
+            </ul>
         </div>
 
     </div>
 
     <p id="footer-credit">Made By Joy</p>
-    <p id="footer-credit"class="ft">Made By N-Studio</p>
 
+    <!-- ★★★ UPDATED: Load config file FIRST ★★★ -->
+    <script src="config.js"></script>
 
     <script>
-        // ================== তোমার ইনফরমেশন এখানে দাও ==================
-        const GITHUB_USERNAME = "bdbla-rana";      
-        const REPO_NAME = "BDBLA";         
-        // ⚠️ WARNING: This token is visible to anyone who views this page's source.
-        const TOKEN = "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"; 
-        const FOLDER_PATH = "files"; 
+        // ==========================================================
+        // Constants are now loaded from config.js
+        // const GITHUB_USERNAME = "..."; (Removed)
+        // const REPO_NAME = "..."; (Removed)
+        // const TOKEN = "..."; (Removed)
         // ==========================================================
 
         const DAILY_UPLOAD_LIMIT = 5; 
@@ -382,7 +327,6 @@
                 return; 
             }
             
-            // <-- ★★★ UPDATED: একই নামের এবং একই সাইজের ফাইল আপলোড চেক করা হচ্ছে ★★★ -->
             const fileExists = uploadData.uploads.some(upload => 
                 upload.name === file.name && upload.size === file.size
             );
@@ -401,7 +345,8 @@
 
             reader.onload = async () => {
                 const base64Content = reader.result.split(',')[1]; 
-                const fileName = `files/file_${Date.now()}_${file.name}`; 
+                // ★★★ UPDATED: Using FOLDER_PATH from config.js ★★★
+                const fileName = `${FOLDER_PATH}/file_${Date.now()}_${file.name}`; 
 
                 const apiUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${fileName}`;
 
@@ -449,7 +394,6 @@
         }
 
         function showSuccess(link) {
-            // <-- ★★★ UPDATED: ফাইল সেভ করার সময় নাম, সাইজ এবং ইউআরএল সেভ করা হচ্ছে ★★★ -->
             addUploadRecord(selectedFile.name, selectedFile.size, link); 
             
             statusMessage.textContent = 'Upload Successful!';
@@ -495,10 +439,6 @@
              }, 2000);
         }
 
-        // ==========================================================
-        // হেলপার ফাংশন
-        // ==========================================================
-
         function formatFileSize(bytes) {
             if (bytes === 0) return '0 Bytes';
             const k = 1024;
@@ -511,8 +451,6 @@
             const today = new Date();
             return today.toISOString().split('T')[0];
         }
-
-
 
         function getUploadData() {
             const today = getTodayDateString();
@@ -536,10 +474,8 @@
             return data;
         }
 
-        // <-- ★★★ UPDATED: ফাংশনটি এখন নাম, সাইজ এবং ইউআরএল সেভ করে ★★★ -->
         function addUploadRecord(fileName, fileSize, fileUrl) {
             const data = getUploadData();
-            // অবজেক্ট হিসেবে পুশ করা হচ্ছে
             data.uploads.push({ name: fileName, size: fileSize, url: fileUrl }); 
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
             updateUploadCounterUI(); 
@@ -572,7 +508,6 @@
 
             data.uploads.slice().reverse().forEach(upload => {
                 const li = document.createElement('li');
-                // <-- NEW: ফাইলের সাইজও দেখানো হচ্ছে -->
                 const fileSize = formatFileSize(upload.size || 0);
                 li.innerHTML = `<a href="${upload.url}" target="_blank">${upload.name}</a> (${fileSize})`;
                 recentUploadsList.appendChild(li);
