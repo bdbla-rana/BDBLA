@@ -184,7 +184,8 @@
             background-color: #4338ca;
         }
 
-        #footer-credit {
+        /* ★★★ UPDATED: Footer CSS now targets #footer-credit.ft ★★★ */
+        #footer-credit.ft {
             position: fixed;
             bottom: 15px;
             right: 20px;
@@ -200,9 +201,7 @@
         }
     </style>
 
-    <!-- ★★★ FIX: Moved config.js script to the <head> ★★★ -->
     <script src="config.js"></script>
-
 </head>
 <body>
 
@@ -219,18 +218,14 @@
         <p id="status-message"></p>
 
         <div id="file-list-container">
-            <!-- File cards will be populated here by JavaScript -->
-        </div>
+            </div>
     </div>
 
-    <p id="footer-credit">Made By Joy</p>
-
-    <!-- ★★★ REMOVED: config.js script was moved to <head> ★★★ -->
-    <!-- <script src="config.js"></script> -->
+    <p id="footer-credit" class="ft">Made By N-Studio</p>
 
     <script>
         // ==========================================================
-        // Constants are now loaded from config.js (which is in the <head>)
+        // Constants are loaded from config.js
         // ==========================================================
 
         const loader = document.getElementById('loader');
@@ -239,12 +234,11 @@
         const searchBox = document.getElementById('search-box');
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Check if config.js variables are loaded
-            if (typeof GITHUB_USERNAME === 'undefined' || typeof TOKEN === 'undefined') {
-                statusMessage.textContent = "Error: config.js file is missing or variables are not defined.";
+            if (typeof GITHUB_USERNAME === 'undefined' || typeof TOKEN === 'undefined' || TOKEN === "PASTE_YOUR_NEW_TOKEN_HERE") {
+                statusMessage.textContent = "Error: config.js file is missing or TOKEN is not set.";
                 statusMessage.className = 'error';
-                console.error("Error: config.js is not loaded or variables are missing.");
-                return; // Stop execution
+                console.error("Error: config.js is not loaded or TOKEN is missing.");
+                return;
             }
             fetchFiles();
         });
@@ -287,7 +281,8 @@
                     statusMessage.className = 'info';
                 }
 
-            } catch (error) {
+            } catch (error)
+                {
                 console.error(error);
                 statusMessage.textContent = `Error: ${error.message}`;
                 statusMessage.className = 'error';
@@ -312,7 +307,6 @@
                     button.textContent = 'Copy URL';
                 }, 2000);
             }).catch(err => {
-                // Fallback for cases where clipboard API might fail (e.g., insecure context)
                 try {
                     const tempInput = document.createElement('input');
                     document.body.appendChild(tempInput);
@@ -327,7 +321,6 @@
                     }, 2000);
                 } catch (copyErr) {
                     console.error('Failed to copy: ', copyErr);
-                    alert('Failed to copy link. Please copy manually.');
                 }
             });
         }
