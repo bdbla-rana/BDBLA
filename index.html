@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Uploader to GitHub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h2>Image Uploader</h2>
+        
+        <div id="drop-area">
+            <input type="file" id="file-input" accept="image/*">
+            <p>Drag & drop your image here, or <strong>browse files</strong></p>
+        </div>
+        
+        <p id="file-name"></p>
+        <p id="upload-counter"></p> 
+
+        <button id="upload-button" disabled>Upload Image</button>
+
+        <div class="loader" id="loader"></div>
+
+        <p id="status-message"></p>
+
+        <div id="result-box">
+            <p>Your image is ready!</p>
+            <div class="link-container">
+                <input type="text" id="image-link" readonly>
+                <button id="copy-button">Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <p id="footer-credit">Made By Joy</p>
+
+    <script src="main.js"></script>
+    <script>
+
+    </script>
+
+</body>
+</html>

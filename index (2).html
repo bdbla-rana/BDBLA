@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Uploader to GitHub</title>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+            padding: 15px; 
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%; 
+            max-width: 450px; 
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            padding: 2rem; 
+            text-align: center;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 10;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #1a202c;
+        }
+
+        #drop-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 40px 20px;
+            background: #f9fafb;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        #drop-area.drag-over {
+            background-color: #eef2ff;
+            border-color: #4f46e5;
+        }
+
+        #drop-area p {
+            margin: 0;
+            font-size: 16px;
+            color: #6b7280;
+        }
+
+        #drop-area p strong {
+            color: #4f46e5;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        #file-name {
+            margin-top: 15px;
+            font-weight: 500;
+            color: #4f46e5;
+            word-wrap: break-word; 
+        }
+
+        #upload-counter {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 8px;
+            margin-bottom: 0;
+        }
+
+        #upload-button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.2s;
+        }
+
+        #upload-button:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        #upload-button:hover:not(:disabled) {
+            background-color: #4338ca;
+        }
+
+        .loader {
+            display: none; 
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto 0;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #result-box {
+            display: none; 
+            margin-top: 25px;
+            text-align: left;
+        }
+
+        #result-box p {
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .link-container {
+            display: flex;
+        }
+
+        #image-link {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px 0 0 8px;
+            font-size: 14px;
+            background: #f9fafb;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #copy-button {
+            padding: 10px 15px;
+            background-color: #10b981;
+            color: white;
+            border: none;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        #status-message {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+
+        #footer-credit {
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            font-size: 14px;
+            font-weight: 600; 
+            animation: rainbowText 3s linear infinite;
+            z-index: 5;
+        }
+
+        @keyframes rainbowText {
+            0% { color: #ff0000; } 
+            15% { color: #ff7f00; }
+            30% { color: #ffff00; }
+            45% { color: #00ff00; }
+            60% { color: #0000ff; }
+            75% { color: #4b0082; }
+            90% { color: #8f00ff; }
+            100% { color: #ff0000; }
+        }
+
+        #recent-uploads-container {
+            display: none;
+            margin-top: 25px;
+            text-align: left;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+        }
+        #recent-uploads-container h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #1a202c;
+        }
+        #recent-uploads-list {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        #recent-uploads-list li {
+            margin-bottom: 8px;
+            background: #f9fafb;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        #recent-uploads-list li a {
+            text-decoration: none;
+            color: #4f46e5;
+            font-weight: 500;
+            font-size: 14px;
+            word-break: break-all;
+        }
+        .nav-button{
+            color: turquoise;
+            border: 2px solid turquoise;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background-color 0.2s, color 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .nav-button:hover {
+            background-color: turquoise;
+            color: white;
+        }
+        .ft {
+            position: fixed;
+            bottom: 15px;
+            left: 20px;
+            font-size: 14px;
+            font-weight: 600; 
+            animation: rainbowText 3s linear infinite;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>File Uploader</h2>
+        
+        <div id="drop-area">
+            <input type="file" id="file-input">
+            <p>Drag & drop your file here, or <strong>browse files</strong></p>
+        </div>
+        
+        <p id="file-name"></p>
+        <p id="upload-counter"></p> 
+
+        <button id="upload-button" disabled>Upload File</button>
+
+        <div class="loader" id="loader"></div>
+
+        <p id="status-message"></p>
+
+        <div id="result-box">
+            <p>Your file is ready!</p>
+            <div class="link-container">
+                <input type="text" id="image-link" readonly>
+                <button id="copy-button">Copy</button>
+            </div>
+        </div>
+        <div>
+            <a href="history.html" class="nav-button">View All Files</a>
+        </div>
+
+        <div id="recent-uploads-container">
+            <h3>Recent Uploads (Today)</h3>
+            <ul id="recent-uploads-list">
+                </ul>
+        </div>
+
+    </div>
+
+    <p id="footer-credit">Made By Joy</p>
+    <p id="footer-credit"class="ft">Made By N-Studio</p>
+
+
+    <script>
+        // ================== তোমার ইনফরমেশন এখানে দাও ==================
+        const GITHUB_USERNAME = "JoyDevnath";      
+        const REPO_NAME = "Image-Hosting";         
+        const TOKEN = "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"; 
+        // ==========================================================
+
+        const DAILY_UPLOAD_LIMIT = 5; 
+        const STORAGE_KEY = 'githubUploaderData_v2'; 
+
+        const dropArea = document.getElementById('drop-area');
+        const fileInput = document.getElementById('file-input');
+        const fileNameDisplay = document.getElementById('file-name');
+        const uploadButton = document.getElementById('upload-button');
+        const loader = document.getElementById('loader');
+        const statusMessage = document.getElementById('status-message');
+        const resultBox = document.getElementById('result-box');
+        const imageLinkInput = document.getElementById('image-link');
+        const copyButton = document.getElementById('copy-button');
+        const uploadCounterDisplay = document.getElementById('upload-counter'); 
+
+        const recentUploadsContainer = document.getElementById('recent-uploads-container');
+        const recentUploadsList = document.getElementById('recent-uploads-list');
+
+        let selectedFile = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUploadCounterUI();
+            displayRecentUploads();
+        });
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.add('drag-over'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.remove('drag-over'), false);
+        });
+
+        dropArea.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        dropArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const files = e.target.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (file) {
+                selectedFile = file;
+                const fileSize = formatFileSize(file.size);
+                fileNameDisplay.textContent = `${file.name} (${fileSize})`;
+                uploadButton.disabled = false;
+                resetStatus();
+            } else {
+                alert("Please select a valid file.");
+            }
+        }
+
+        uploadButton.addEventListener('click', () => {
+            if (selectedFile) {
+                uploadImage(selectedFile);
+            }
+        });
+
+        async function uploadImage(file) {
+            
+            const uploadData = getUploadData();
+
+            if (uploadData.uploads.length >= DAILY_UPLOAD_LIMIT) {
+                showError(`আপনি আজ ${DAILY_UPLOAD_LIMIT}টির বেশি ফাইল আপলোড করতে পারবেন না।`);
+                return; 
+            }
+            
+            // <-- ★★★ UPDATED: একই নামের এবং একই সাইজের ফাইল আপলোড চেক করা হচ্ছে ★★★ -->
+            const fileExists = uploadData.uploads.some(upload => 
+                upload.name === file.name && upload.size === file.size
+            );
+            
+            if (fileExists) {
+                showError(`এই ফাইলটি ("${file.name}") আজ একবার আপলোড করা হয়েছে।`);
+                return; 
+            }
+
+            uploadButton.disabled = true;
+            loader.style.display = 'block';
+            resetStatus();
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+
+            reader.onload = async () => {
+                const base64Content = reader.result.split(',')[1]; 
+                const fileName = `files/file_${Date.now()}_${file.name}`; 
+
+                const apiUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${fileName}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${TOKEN}`,
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: `Uploaded file: ${file.name}`,
+                            content: base64Content,
+                            committer: {
+                                name: GITHUB_USERNAME,
+                                email: "uploader@example.com"
+                            }
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        const viewLink = data.content.download_url;
+                        showSuccess(viewLink);
+                    } else {
+                        showError(data.message || "Failed to upload file.");
+                    }
+
+                } catch (error) {
+                    console.error(error);
+                    showError("An error occurred. Check the console.");
+                } finally {
+                    loader.style.display = 'none';
+                    uploadButton.disabled = false;
+                }
+            };
+
+            reader.onerror = () => {
+                showError("Failed to read the file.");
+                loader.style.display = 'none';
+                uploadButton.disabled = false;
+            };
+        }
+
+        function showSuccess(link) {
+            // <-- ★★★ UPDATED: ফাইল সেভ করার সময় নাম, সাইজ এবং ইউআরএল সেভ করা হচ্ছে ★★★ -->
+            addUploadRecord(selectedFile.name, selectedFile.size, link); 
+            
+            statusMessage.textContent = 'Upload Successful!';
+            statusMessage.className = 'success';
+            resultBox.style.display = 'block';
+            imageLinkInput.value = link;
+        }
+
+        function showError(message) {
+            statusMessage.textContent = `Error: ${message}`;
+            statusMessage.className = 'error';
+            resultBox.style.display = 'none';
+        }
+
+        function resetStatus() {
+            statusMessage.textContent = '';
+            statusMessage.className = '';
+            resultBox.style.display = 'none';
+            updateUploadCounterUI(); 
+            displayRecentUploads();
+        }
+
+        copyButton.addEventListener('click', () => {
+            imageLinkInput.select();
+            
+            try {
+                navigator.clipboard.writeText(imageLinkInput.value).then(() => {
+                    setCopyButtonText('Copied!');
+                }).catch(() => {
+                    document.execCommand('copy');
+                    setCopyButtonText('Copied!');
+                });
+            } catch (err) {
+                document.execCommand('copy');
+                setCopyButtonText('Copied!');
+            }
+        });
+
+        function setCopyButtonText(text) {
+             copyButton.textContent = text;
+             setTimeout(() => {
+                  copyButton.textContent = 'Copy';
+             }, 2000);
+        }
+
+        // ==========================================================
+        // হেলপার ফাংশন
+        // ==========================================================
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function getTodayDateString() {
+            const today = new Date();
+            return today.toISOString().split('T')[0];
+        }
+
+
+
+        function getUploadData() {
+            const today = getTodayDateString();
+            let data;
+            try {
+                data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { uploads: [], date: today };
+            } catch (e) {
+                data = { uploads: [], date: today };
+            }
+
+            if (data.date !== today) {
+                data.uploads = []; 
+                data.date = today;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            }
+            
+            if (!Array.isArray(data.uploads)) {
+                data.uploads = [];
+            }
+            
+            return data;
+        }
+
+        // <-- ★★★ UPDATED: ফাংশনটি এখন নাম, সাইজ এবং ইউআরএল সেভ করে ★★★ -->
+        function addUploadRecord(fileName, fileSize, fileUrl) {
+            const data = getUploadData();
+            // অবজেক্ট হিসেবে পুশ করা হচ্ছে
+            data.uploads.push({ name: fileName, size: fileSize, url: fileUrl }); 
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            updateUploadCounterUI(); 
+            displayRecentUploads();
+        }
+
+        function updateUploadCounterUI() {
+            const data = getUploadData();
+            const remaining = DAILY_UPLOAD_LIMIT - data.uploads.length;
+            
+            if (remaining <= 0) {
+                uploadCounterDisplay.textContent = "আজকের জন্য আপনার আপলোড লিমিট শেষ।";
+                uploadCounterDisplay.style.color = "#ef4444"; 
+            } else {
+                uploadCounterDisplay.textContent = `আজকের জন্য ${remaining} টি আপলোড বাকি আছে।`;
+                uploadCounterDisplay.style.color = "#6b7280";
+            }
+        }
+
+        function displayRecentUploads() {
+            const data = getUploadData();
+            recentUploadsList.innerHTML = ''; 
+
+            if (data.uploads.length === 0) {
+                recentUploadsContainer.style.display = 'none';
+                return;
+            }
+
+            recentUploadsContainer.style.display = 'block'; 
+
+            data.uploads.slice().reverse().forEach(upload => {
+                const li = document.createElement('li');
+                // <-- NEW: ফাইলের সাইজও দেখানো হচ্ছে -->
+                const fileSize = formatFileSize(upload.size || 0);
+                li.innerHTML = `<a href="${upload.url}" target="_blank">${upload.name}</a> (${fileSize})`;
+                recentUploadsList.appendChild(li);
+            });
+        }
+
+    </script>
+
+</body>
+</html>

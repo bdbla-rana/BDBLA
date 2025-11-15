@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File History</title>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+            padding: 20px 15px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%; 
+            /* <-- CHANGED: Max-width increased for card view --> */
+            max-width: 900px; 
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            padding: 2rem; 
+            text-align: left;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 10;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #1a202c;
+            text-align: center;
+        }
+
+        /* --- NEW: Button to go back to Upload Page --- */
+        .nav-button {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #10b981;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 15px;
+            transition: background-color 0.2s;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+        }
+        .nav-button:hover {
+            background-color: #059669;
+        }
+        .header-controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        /* --- End of Nav Button Style --- */
+
+        #search-box {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        #search-box:focus {
+            border-color: #4f46e5;
+            outline: none;
+        }
+
+        .loader {
+            display: none; 
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto 0;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #status-message {
+            margin-top: 15px;
+            font-size: 14px;
+            text-align: center;
+            font-weight: 500;
+        }
+        .error { color: #ef4444; }
+        .info { color: #6b7280; }
+
+        /* <-- CHANGED: Styles for Card View --> */
+        #file-list-container {
+            background-repeat: initial;
+            background-size: cover;
+            box-shadow: #0000ff 0px 0px 8px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px; /* Space between cards */
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+
+        .file-card {
+            width: 250px; /* Width of each card */
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            overflow: hidden; /* To keep border-radius on preview */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .file-preview {
+            height: 150px;
+            background-color: #eef2ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .file-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures image covers the area */
+        }
+        
+        .file-preview-placeholder {
+            font-size: 28px;
+            font-weight: 600;
+            color: #4f46e5;
+            text-transform: uppercase;
+        }
+
+        .file-info {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .file-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a202c;
+            word-break: break-all;
+            margin-top: 0;
+            margin-bottom: 15px;
+            flex-grow: 1; /* Pushes button to bottom */
+        }
+
+        .copy-button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .copy-button:hover {
+            background-color: #4338ca;
+        }
+        /* --- End of Card View Styles --- */
+
+
+        #footer-credit {
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            font-size: 14px;
+            font-weight: 600; 
+            animation: rainbowText 3s linear infinite;
+            z-index: 5;
+        }
+
+        @keyframes rainbowText {
+            0% { color: #ff0000; } 
+            15% { color: #ff7f00; }
+            30% { color: #ffff00; }
+            45% { color: #00ff00; }
+            60% { color: #0000ff; }
+            75% { color: #4b0082; }
+            90% { color: #8f00ff; }
+            100% { color: #ff0000; }
+        }
+        .ft {
+            position: fixed;
+            bottom: 15px;
+            left: 20px;
+            font-size: 14px;
+            font-weight: 600; 
+            animation: rainbowText 3s linear infinite;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>File History</h2>
+        
+        <div class="header-controls">
+            <a href="index.html" class="nav-button">Upload New File</a>
+        </div>
+        
+        <input type="text" id="search-box" placeholder="Search for files...">
+        
+        <div class="loader" id="loader"></div>
+        <p id="status-message"></p>
+
+        <div id="file-list-container">
+            </div>
+    </div>
+
+    <p id="footer-credit">Made By Joy</p>
+    <p id="footer-credit"class="ft">Made By N-Studio</p>
+
+
+    <script>
+        // ================== তোমার ইনফরমেশন এখানে দাও ==================
+        const GITHUB_USERNAME = "JoyDevnath";      
+        const REPO_NAME = "Image-Hosting";         
+        // ⚠️ WARNING: This token is visible to anyone who views this page's source.
+        const TOKEN = "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"; 
+        const FOLDER_PATH = "files"; 
+        // ==========================================================
+
+        const loader = document.getElementById('loader');
+        const statusMessage = document.getElementById('status-message');
+        // <-- CHANGED: Points to the container div -->
+        const fileListContainer = document.getElementById('file-list-container');
+        const searchBox = document.getElementById('search-box');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchFiles();
+        });
+
+        searchBox.addEventListener('input', (e) => {
+            filterFiles(e.target.value);
+        });
+
+        async function fetchFiles() {
+            loader.style.display = 'block';
+            statusMessage.textContent = '';
+            
+            const apiUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${FOLDER_PATH}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'Authorization': `token ${TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                    }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error(`Folder '${FOLDER_PATH}' not found. Check FOLDER_PATH variable.`);
+                    }
+                    if (response.status === 401) {
+                        throw new Error("Bad token. Check your GitHub Token.");
+                    }
+                    const data = await response.json();
+                    throw new Error(data.message || "Failed to fetch files.");
+                }
+
+                const data = await response.json();
+
+                if (Array.isArray(data) && data.length > 0) {
+                    displayFiles(data);
+                } else {
+                    statusMessage.textContent = "No files found in this folder.";
+                    statusMessage.className = 'info';
+                }
+
+            } catch (error) {
+                console.error(error);
+                statusMessage.textContent = `Error: ${error.message}`;
+                statusMessage.className = 'error';
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        // <-- NEW: Helper function to check if file is an image -->
+        function isImage(fileName) {
+            const extensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.svg'];
+            const lowerCaseName = fileName.toLowerCase();
+            return extensions.some(ext => lowerCaseName.endsWith(ext));
+        }
+
+        // <-- NEW: Helper function to handle copy button click -->
+        function handleCopyClick(e) {
+            const button = e.target;
+            const url = button.dataset.url;
+
+            navigator.clipboard.writeText(url).then(() => {
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = 'Copy URL';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy link.');
+            });
+        }
+
+        // <-- CHANGED: This function now builds cards instead of a list -->
+        function displayFiles(files) {
+            fileListContainer.innerHTML = ''; // Clear existing list
+            
+            files.slice().reverse().forEach(file => {
+                if(file.type === 'file') {
+                    
+                    // Create card element
+                    const card = document.createElement('div');
+                    card.className = 'file-card';
+
+                    // Create preview element
+                    const preview = document.createElement('div');
+                    preview.className = 'file-preview';
+
+                    if (isImage(file.name)) {
+                        const img = document.createElement('img');
+                        img.src = file.download_url;
+                        img.alt = file.name;
+                        preview.appendChild(img);
+                    } else {
+                        // Create placeholder for non-image files
+                        const extension = file.name.split('.').pop() || 'file';
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'file-preview-placeholder';
+                        placeholder.textContent = extension.substring(0, 4); // Show max 4 chars
+                        preview.appendChild(placeholder);
+                    }
+
+                    // Create info section
+                    const info = document.createElement('div');
+                    info.className = 'file-info';
+
+                    // Create file name
+                    const name = document.createElement('p');
+                    name.className = 'file-name';
+                    name.textContent = file.name;
+                    
+                    // Create copy button
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'copy-button';
+                    copyBtn.textContent = 'Copy URL';
+                    copyBtn.dataset.url = file.download_url; // Store URL on button
+                    copyBtn.addEventListener('click', handleCopyClick); // Add listener
+
+                    // Append all parts
+                    info.appendChild(name);
+                    info.appendChild(copyBtn);
+                    card.appendChild(preview);
+                    card.appendChild(info);
+                    
+                    // Add card to the container
+                    fileListContainer.appendChild(card);
+                }
+            });
+        }
+
+        // <-- CHANGED: Filter function now searches cards -->
+        function filterFiles(searchTerm) {
+            const term = searchTerm.toLowerCase();
+            const items = fileListContainer.querySelectorAll('.file-card'); // Get all cards
+
+            items.forEach(item => {
+                // Find the file name text within the card
+                const fileName = item.querySelector('.file-name').textContent.toLowerCase();
+                
+                if (fileName.includes(term)) {
+                    item.style.display = 'flex'; // Use flex to match card style
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+    </script>
+
+</body>
+</html>
